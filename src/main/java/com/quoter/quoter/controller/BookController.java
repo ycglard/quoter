@@ -25,46 +25,13 @@ public class BookController {
     @Autowired
     BookService bookService;
 
-    @GetMapping("/books")
-    public ResponseEntity<List<Book>> getBooks(@RequestParam(required = false) String title){//title'a ya da başka alanlara göre de getirilebilir
-        List<Book> books = new ArrayList<>(bookRepository.findAll());
+    @GetMapping("/book")
+    public ResponseEntity<String> getBook(){//title'a ya da başka alanlara göre de getirilebilir
+        Book book = new Book();
 
-        if (books.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        String books = bookService.randomBook();
 
         return new ResponseEntity<>(books, HttpStatus.OK);
-    }
-
-    @PostMapping("/books")
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
-        try {
-            Book _book = bookRepository
-                    .save(new Book(book.getName(), book.getDescription(),book.getContent()));
-            return new ResponseEntity<>(_book, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-    @GetMapping("/books/line")
-    public ResponseEntity<ResultDto> getRandomLine() {
-        ResultDto resultDto = bookService.generateFinalProduct();
-        if(Objects.isNull(resultDto))
-            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-
-        return new ResponseEntity<>(resultDto,HttpStatus.OK);
-    }
-    @GetMapping("/books/book")
-    public ResponseEntity<Book> getLineFromBook(@RequestParam String bookId) {
-        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    @GetMapping("/books/author")
-    public ResponseEntity<Book> getLineFromAuthor(@RequestParam String authorId) {
-        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    @GetMapping("/books/year")
-    public ResponseEntity<Book> getLineFromYear(@RequestParam String year) {
-        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public BookRepository getBookRepository() {

@@ -6,15 +6,7 @@ import org.springframework.stereotype.Service;
 
 
 public interface BookService {
-    Book randomBook();
-
-    ResultDto generateFinalProduct();
-
-    void fetchBookFromOL();
-
-    String generateRandomISBN();
-
-    String text(){}
+    String randomBook();
 
 
 }
