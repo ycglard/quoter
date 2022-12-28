@@ -11,6 +11,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,12 +27,10 @@ public class BookController {
     BookService bookService;
 
     @GetMapping("/book")
-    public ResponseEntity<String> getBook(){//title'a ya da başka alanlara göre de getirilebilir
-        Book book = new Book();
+    public ResponseEntity<String> getBook() throws IOException {//title'a ya da başka alanlara göre de getirilebilir
+        String body = bookService.randomBook();
 
-        String books = bookService.randomBook();
-
-        return new ResponseEntity<>(books, HttpStatus.OK);
+        return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     public BookRepository getBookRepository() {
