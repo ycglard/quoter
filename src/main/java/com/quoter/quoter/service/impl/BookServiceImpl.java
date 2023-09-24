@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -44,16 +42,17 @@ public class BookServiceImpl implements BookService {
         Random r = new Random();
         StringBuilder plainTextUrl = new StringBuilder();
         String gResponse = restTemplate.getForEntity(gutenbergEndpoint,String.class).getBody();
-        int count = (int) getBookCount(gResponse);
+
+        int count = (int) getFieldFromJson(gResponse, "count");
         int randomGeneratedValue = r.nextInt(count);
 
-        /*plainTextUrl.append(bookPlainTextFormat)
-                .append(randomGeneratedValue)
-                .append("/pg")
-                .append(randomGeneratedValue)
-                .append(".txt");*/
 
-        return getPlainTextUrl(randomGeneratedValue);//getRandomChunkFromBook(Jsoup.connect(plainTextUrl.toString()).get().html());
+        String bookInformation = restTemplate.getForEntity(gutenbergEndpoint + "/" + randomGeneratedValue,String.class).getBody();
+        Object textFormats = getFieldFromJson(bookInformation,"formats");
+
+        String plainUrl = getFormat(textFormats,"text/plain");
+
+        return getRandomChunkFromBook(Jsoup.connect(plainUrl).get().html());
 
     }
     private String getPlainTextUrl(int bookId){
@@ -83,11 +82,11 @@ public class BookServiceImpl implements BookService {
     //https://www.gutenberg.org/cache/epub/69638/pg69638-images.html
     //https://www.gutenberg.org/cache/epub/69638/pg69638.txt -> plain text
     //https://www.gutenberg.org/cache/epub/2643/pg2643.txt -> id'yi artırarak ilerleyince sonuç veriyor
-    private Object getBookCount(String json){
+    private Object getFieldFromJson(String json,String field){
         ObjectMapper mapper = new ObjectMapper();
         try{
             Map<String, Object> map = mapper.readValue(json, Map.class);
-            return map.get("count");
+            return map.get(field);
         }catch(Exception e){
             logger.error("error while parsing json:" + Arrays.toString(e.getStackTrace()));
             return null;
@@ -97,6 +96,12 @@ public class BookServiceImpl implements BookService {
     private String getRandomChunk(String wholeText){
 
         return wholeText;
+    }
+
+    private String getFormat(Object map,String format){
+        LinkedHashMap hashMap = (LinkedHashMap) map;
+        String url = (String) hashMap.get((hashMap.keySet().stream().filter(key -> key.toString().contains(format)).findFirst()).get());
+        return url;
     }
     /*private Book mapJsonToBook(String json){
         Book book = new Book();
